@@ -1,3 +1,4 @@
+import { findDom, compareTwoVdom } from './react-dom'
 class Updater {
   constructor(classInstance) {
     this.classInstance = classInstance//保存component实例
@@ -34,7 +35,7 @@ class Updater {
     return state
   }
 }
-function shouldUpdate (classInstance,newState) {
+function shouldUpdate (classInstance, newState) {
   // 真正去修改实例状态
   classInstance.state = newState
   // 然后调用实例的updateComponent方法进行更新
@@ -51,7 +52,12 @@ export default class Component {
   setState (partialState, callback) {
     this.updater.addState(partialState, callback)
   }
-  forceUpdate(){
-    console.log('更新')
+  forceUpdate () {
+    console.log(this)
+    let oldRenderVdom = this.oldRenderVdom //创建dom元素时,将vdom挂载到实例上
+    let oldDom = findDom(oldRenderVdom) // 找到vdom对应的真实dom
+    let newRenderVdom = this.render() //类组件中实例方法,此时vdom已经更新,返回最新的vdom
+    compareTwoVdom(oldDom.parentNode, oldRenderVdom, newRenderVdom)//对比dom差异
+    this.oldRenderVdom = newRenderVdom//更新oldVdom
   }
 }

@@ -74,10 +74,10 @@ import ReactDOM from './react-dom'
 //     return (<><Log isLogin={this.state.isLogin}></Log> {button}</>)
 //   }
 // }
-function Ao () {
-  // return React.createElement('h1', null, '123')
-  return <h1>123<span className="text-muted">www</span></h1>
-}
+// function Ao () {
+//   // return React.createElement('h1', null, '123')
+//   return <h1>123<span className="text-muted">www</span></h1>
+// }
 // console.log(<LoginControl />)
 // console.log(<Ao />)
 // console.log(<h1>123</h1>)
@@ -94,9 +94,9 @@ class Abc extends React.Component {
     this.setState({ name: 'AAA' })
   }
   render () {
-    this.setState({ name: 'name2' })
-    this.setState({ name: 'name3' })
-    this.setState({ name: 'name4' })
+    // this.setState({ name: 'name2' })
+    // this.setState({ name: 'name3' })
+    // this.setState({ name: 'name4' })
     return <h1>123<span className="text-muted" onClick={this.clickSpan}>{this.state.name}</span></h1>
   }
 }

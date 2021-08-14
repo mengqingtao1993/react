@@ -4,7 +4,6 @@ function render (vdom, container) {
   container.appendChild(newDom)
 }
 function createDom (vdom) {
-  console.log(vdom)
   if (typeof vdom === 'number' || typeof vdom === 'string') {
     return document.createTextNode(vdom)
   }
@@ -37,18 +36,23 @@ function createDom (vdom) {
       render(props.children, dom)
     }
   }
-  // vdom.dom = dom
+  vdom.dom = dom //vdom和真实dom建立联系
   return dom
 }
 function mountFunctionComponent (vdom) {
   let { type, props } = vdom
   let renderDom = type(props)
+  vdom.oldRenderVdom = renderDom//将函数组件vdom与渲染的vdom建立联系
   return createDom(renderDom)
 }
 function mountClassComponent (vdom) {
+  // debugger
   let { type, props } = vdom
-  let renderDom = new type(props)
-  return createDom(renderDom.render())
+  let classInstance = new type(props)
+  let renderDom = classInstance.render()
+  console.log(classInstance)
+  classInstance.oldRenderVdom = vdom.oldRenderVdom = renderDom// 将类组件vdom与渲染的vdom建立联系,并将实例与vdom建立联系
+  return createDom(renderDom)
 }
 function reconcileChildren (children, parentDom) {
   for (let i = 0; i < children.length; i++) {
@@ -71,7 +75,24 @@ function updateProps (dom, oldProps, newProps) {
   }
 
 }
+export function findDom (vdom) {
+  console.log(vdom)
+  let { type } = vdom
+  let dom
+  if (typeof type === 'function') {
+    dom = findDom(vdom.oldRenderVdom)
+  } else {
+    dom = vdom.dom
+  }
+  return dom
+}
 const ReactDOM = {
   render
+}
+export function compareTwoVdom (parentDom, oldVdom, newVdom) {
+  // 查到旧的真实dom,创建新的真实dom,替换
+  let oldDom = findDom(oldVdom)
+  let newDom = createDom(newVdom)
+  parentDom.replaceChild(oldDom, newDom)
 }
 export default ReactDOM
