@@ -87,17 +87,32 @@ class Abc extends React.Component {
   constructor(props) {
     super(props)
     this.props = props
-    this.state = { name: 'name' }
+    this.state = { num: 1 }
     this.clickSpan = this.clickSpan.bind(this)
   }
   clickSpan () {
-    this.setState({ name: 'AAA' })
+    this.setState({ num: this.state.num + 1 })
+    console.log(this.state.num)
+    this.setState({ num: this.state.num + 1 })
+    console.log(this.state.num)
+    this.setState({ num: this.state.num + 1 })
+    console.log(this.state.num)
+    this.setState({ num: this.state.num + 1 })
+    console.log(this.state.num)
+    setTimeout(() => {
+      this.setState({ num: this.state.num + 1 })
+      console.log(this.state.num)
+      this.setState({ num: this.state.num + 1 })
+      console.log(this.state.num)
+      this.setState({ num: this.state.num + 1 })
+      console.log(this.state.num)
+      this.setState({ num: this.state.num + 1 })
+      console.log(this.state.num)
+    })
   }
   render () {
-    // this.setState({ name: 'name2' })
-    // this.setState({ name: 'name3' })
-    // this.setState({ name: 'name4' })
-    return <h1>123<span className="text-muted" onClick={this.clickSpan}>{this.state.name}</span></h1>
+
+    return <h1>num<span className="text-muted">{this.state.num}</span><div onClick={this.clickSpan}>+</div></h1>
   }
 }
 ReactDOM.render(

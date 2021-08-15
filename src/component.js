@@ -13,8 +13,12 @@ class Updater {
     this.emitUpdate()// 触发更新
   }
   emitUpdate () {
-    // 此处会加判断,如果是异步就先不更新,如果是同步就立即调用
-    this.updateComponent() // 更新组件
+    // 如果是批量更新模式,则将更新函数装入updates
+    if (updateQueue.isBatchingUpdate) {
+      updateQueue.updaters.push(this)
+    } else {
+      this.updateComponent() // 更新组件
+    }
   }
   updateComponent () {
     if (this.penddingState.length > 0) {
@@ -53,11 +57,22 @@ export default class Component {
     this.updater.addState(partialState, callback)
   }
   forceUpdate () {
-    console.log(this)
     let oldRenderVdom = this.oldRenderVdom //创建dom元素时,将vdom挂载到实例上
     let oldDom = findDom(oldRenderVdom) // 找到vdom对应的真实dom
     let newRenderVdom = this.render() //类组件中实例方法,此时vdom已经更新,返回最新的vdom
     compareTwoVdom(oldDom.parentNode, oldRenderVdom, newRenderVdom)//对比dom差异
     this.oldRenderVdom = newRenderVdom//更新oldVdom
+  }
+}
+export let updateQueue = {
+  isBatchingUpdate: false,// 是否开始批量更新
+  updaters: [],// 批量更新队列
+  batchUpdate () {
+    for (let updater of updateQueue.updaters) {
+      //updater是Updater类的实例
+      updater.updateComponent()
+    }
+    updateQueue.isBatchingUpdate = false
+    updateQueue.updaters.length = 0
   }
 }

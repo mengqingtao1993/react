@@ -1,4 +1,5 @@
 // import REACT_TEXT from './types'
+import { addEvent } from './event'
 function render (vdom, container) {
   let newDom = createDom(vdom)// 获取真实dom
   container.appendChild(newDom)
@@ -50,7 +51,6 @@ function mountClassComponent (vdom) {
   let { type, props } = vdom
   let classInstance = new type(props)
   let renderDom = classInstance.render()
-  console.log(classInstance)
   classInstance.oldRenderVdom = vdom.oldRenderVdom = renderDom// 将类组件vdom与渲染的vdom建立联系,并将实例与vdom建立联系
   return createDom(renderDom)
 }
@@ -68,7 +68,8 @@ function updateProps (dom, oldProps, newProps) {
         dom.style[attr] = newProps[key][attr]
       }
     } else if (key.startsWith('on')) {
-      dom[key.toLocaleLowerCase()] = newProps[key]
+      // dom[key.toLocaleLowerCase()] = newProps[key]
+      addEvent(dom, key.toLocaleLowerCase(), newProps[key])
     } else {
       dom[key] = newProps[key]
     }
@@ -76,7 +77,6 @@ function updateProps (dom, oldProps, newProps) {
 
 }
 export function findDom (vdom) {
-  console.log(vdom)
   let { type } = vdom
   let dom
   if (typeof type === 'function') {
@@ -93,6 +93,6 @@ export function compareTwoVdom (parentDom, oldVdom, newVdom) {
   // 查到旧的真实dom,创建新的真实dom,替换
   let oldDom = findDom(oldVdom)
   let newDom = createDom(newVdom)
-  parentDom.replaceChild(oldDom, newDom)
+  parentDom.replaceChild(newDom, oldDom)
 }
 export default ReactDOM
