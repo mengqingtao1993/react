@@ -144,28 +144,48 @@ import ReactDOM from './react-dom'
 //     )
 //   }
 // }
-class Son extends React.Component {
-  constructor(props) {
-    super(props)
-    this.son = React.createRef()
-  }
-  sonClick = () => {
-    console.log('sonClick')
-  }
-  render () {
-    return <span onclick={this.sonClick}>son</span>
-  }
+// class Son extends React.Component {
+//   constructor(props) {
+//     super(props)
+//     this.son = React.createRef()
+//   }
+//   sonClick = () => {
+//     console.log('sonClick', this.son.current.innerText = '111')
+//   }
+//   render () {
+//     return <span onclick={this.sonClick} ref={this.son}>son</span>
+//   }
+// }
+
+// class Fa extends React.Component {
+//   constructor(props) {
+//     super(props)
+//     this.fa = React.createRef()
+//   }
+//   faClick = () => {
+//     this.fa.current.sonClick()
+//   }
+//   render () {
+//     return <Son onClick={this.faClick} ref={this.fa} />
+//   }
+// }
+function Son2 (props, ref) {
+  return <span ref={ref}>son2</span>
 }
-class Fa extends React.Component {
+const ForwardSon2 = React.forwardRef(Son2)
+class Fa2 extends React.Component {
   constructor(props) {
     super(props)
     this.fa = React.createRef()
   }
   faClick = () => {
-    this.fa.current.sonClick()
+    this.fa.current.innerText = '112'
   }
   render () {
-    return <Son onClick={this.faClick} ref={this.fa} />
+    return <>
+      <ForwardSon2 ref={this.fa} />
+      <button onClick={this.faClick}>click</button>
+    </>
   }
 }
 ReactDOM.render(
@@ -174,6 +194,7 @@ ReactDOM.render(
   // <Abc />,
   // abc,
   // <RefClassComponent />,
-  <Fa />,
+  // <Fa />,
+  <Fa2 />,
   document.getElementById('root')
 )

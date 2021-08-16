@@ -5,7 +5,7 @@ function createElement (type, config, children) {
   if (config) {
     ref = config.ref
     key = config.key
-    delete config.ref
+    // delete config.ref
     delete config.key
   }
   let props = { ...config }
@@ -24,9 +24,17 @@ function createElement (type, config, children) {
 function createRef () {
   return { current: null }
 }
+function forwardRef (functionComponent) {
+  return class extends Component {
+    render () {
+      return functionComponent(this.props, this.props.ref)
+    }
+  }
+}
 const React = {
   createElement,
   Component,
-  createRef
+  createRef,
+  forwardRef
 }
 export default React
