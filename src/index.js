@@ -122,26 +122,50 @@ import ReactDOM from './react-dom'
 //   render () {
 //     return <h1 onClick={this.clickRoot}>num<span className="text-muted">{this.state.num}</span><div onClick={this.clickSpan}>+</div></h1>
 //   }
+// // }
+// class RefClassComponent extends React.Component {
+//   constructor(props) {
+//     super(props)
+//     this.A = React.createRef()
+//     this.B = React.createRef()
+//     this.C = React.createRef()
+//   }
+//   add = () => {
+//     this.C.current.value = parseFloat(this.A.current.value) + parseFloat(this.B.current.value)
+//   }
+//   render () {
+//     return (
+//       <>
+//         <input ref={this.A} />
+//         <input ref={this.B} />
+//         <span onClick={this.add}>+</span>
+//         <input ref={this.C} />
+//       </>
+//     )
+//   }
 // }
-class RefClassComponent extends React.Component {
+class Son extends React.Component {
   constructor(props) {
     super(props)
-    this.A = React.createRef()
-    this.B = React.createRef()
-    this.C = React.createRef()
+    this.son = React.createRef()
   }
-  add = () => {
-    this.C.current.value = parseFloat(this.A.current.value) + parseFloat(this.B.current.value)
+  sonClick = () => {
+    console.log('sonClick')
   }
   render () {
-    return (
-      <>
-        <input ref={this.A} />
-        <input ref={this.B} />
-        <span onClick={this.add}>+</span>
-        <input ref={this.C} />
-      </>
-    )
+    return <span onclick={this.sonClick}>son</span>
+  }
+}
+class Fa extends React.Component {
+  constructor(props) {
+    super(props)
+    this.fa = React.createRef()
+  }
+  faClick = () => {
+    this.fa.current.sonClick()
+  }
+  render () {
+    return <Son onClick={this.faClick} ref={this.fa} />
   }
 }
 ReactDOM.render(
@@ -149,6 +173,7 @@ ReactDOM.render(
   // <Ao />,
   // <Abc />,
   // abc,
-  <RefClassComponent />,
+  // <RefClassComponent />,
+  <Fa />,
   document.getElementById('root')
 )

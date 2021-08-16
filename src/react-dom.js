@@ -49,8 +49,9 @@ function mountFunctionComponent (vdom) {
 }
 function mountClassComponent (vdom) {
   // debugger
-  let { type, props } = vdom
+  let { type, props, ref } = vdom
   let classInstance = new type(props)
+  if (ref) ref.current = classInstance
   let renderDom = classInstance.render()
   classInstance.oldRenderVdom = vdom.oldRenderVdom = renderDom// 将类组件vdom与渲染的vdom建立联系,并将实例与vdom建立联系
   return createDom(renderDom)
