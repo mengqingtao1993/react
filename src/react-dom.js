@@ -8,7 +8,7 @@ function createDom (vdom) {
   if (typeof vdom === 'number' || typeof vdom === 'string') {
     return document.createTextNode(vdom)
   }
-  let { type, props } = vdom
+  let { type, props, ref } = vdom
   let dom
   // 创建对应type的dom活textNode
   // if (type === REACT_TEXT || typeof vdom == 'string') {
@@ -38,6 +38,7 @@ function createDom (vdom) {
     }
   }
   vdom.dom = dom //vdom和真实dom建立联系
+  if (ref) ref.current = dom
   return dom
 }
 function mountFunctionComponent (vdom) {
@@ -60,6 +61,7 @@ function reconcileChildren (children, parentDom) {
   }
 }
 function updateProps (dom, oldProps, newProps) {
+  console.log("newProps", newProps)
   for (let key in newProps) {
     if (key === 'children') {
       continue

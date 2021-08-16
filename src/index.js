@@ -83,42 +83,72 @@ import ReactDOM from './react-dom'
 // console.log(<h1>123</h1>)
 // let abc = React.createElement('div', { className: 'aaa', style: { color: 'red', fontSize: '14px' } }, '123', '2344')
 // console.log(abc)
-class Abc extends React.Component {
+
+
+/**
+ * setState实现
+ */
+// class Abc extends React.Component {
+//   constructor(props) {
+//     super(props)
+//     this.props = props
+//     this.state = { num: 1 }
+//     this.clickSpan = this.clickSpan.bind(this)
+//     this.clickRoot = this.clickRoot.bind(this)
+//   }
+//   clickSpan () {
+//     this.setState({ num: this.state.num + 1 })
+//     console.log(this.state.num)
+//     this.setState({ num: this.state.num + 1 })
+//     console.log(this.state.num)
+//     this.setState({ num: this.state.num + 1 })
+//     console.log(this.state.num)
+//     this.setState({ num: this.state.num + 1 })
+//     console.log(this.state.num)
+//     setTimeout(() => {
+//       this.setState({ num: this.state.num + 1 })
+//       console.log(this.state.num)
+//       this.setState({ num: this.state.num + 1 })
+//       console.log(this.state.num)
+//       this.setState({ num: this.state.num + 1 })
+//       console.log(this.state.num)
+//       this.setState({ num: this.state.num + 1 })
+//       console.log(this.state.num)
+//     })
+//   }
+//   clickRoot(){
+//     console.log('clickRoot')
+//   }
+//   render () {
+//     return <h1 onClick={this.clickRoot}>num<span className="text-muted">{this.state.num}</span><div onClick={this.clickSpan}>+</div></h1>
+//   }
+// }
+class RefClassComponent extends React.Component {
   constructor(props) {
     super(props)
-    this.props = props
-    this.state = { num: 1 }
-    this.clickSpan = this.clickSpan.bind(this)
+    this.A = React.createRef()
+    this.B = React.createRef()
+    this.C = React.createRef()
   }
-  clickSpan () {
-    this.setState({ num: this.state.num + 1 })
-    console.log(this.state.num)
-    this.setState({ num: this.state.num + 1 })
-    console.log(this.state.num)
-    this.setState({ num: this.state.num + 1 })
-    console.log(this.state.num)
-    this.setState({ num: this.state.num + 1 })
-    console.log(this.state.num)
-    setTimeout(() => {
-      this.setState({ num: this.state.num + 1 })
-      console.log(this.state.num)
-      this.setState({ num: this.state.num + 1 })
-      console.log(this.state.num)
-      this.setState({ num: this.state.num + 1 })
-      console.log(this.state.num)
-      this.setState({ num: this.state.num + 1 })
-      console.log(this.state.num)
-    })
+  add = () => {
+    this.C.current.value = parseFloat(this.A.current.value) + parseFloat(this.B.current.value)
   }
   render () {
-
-    return <h1>num<span className="text-muted">{this.state.num}</span><div onClick={this.clickSpan}>+</div></h1>
+    return (
+      <>
+        <input ref={this.A} />
+        <input ref={this.B} />
+        <span onClick={this.add}>+</span>
+        <input ref={this.C} />
+      </>
+    )
   }
 }
 ReactDOM.render(
   // <Clock a={123}></Clock>,
   // <Ao />,
-  <Abc />,
+  // <Abc />,
   // abc,
+  <RefClassComponent />,
   document.getElementById('root')
 )
