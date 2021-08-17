@@ -1,5 +1,5 @@
-import React from './react'
-import ReactDOM from './react-dom'
+import React from 'react'
+import ReactDOM from 'react-dom'
 /**
  * 
  * @param {state} props 
@@ -169,22 +169,130 @@ import ReactDOM from './react-dom'
 //     return <Son onClick={this.faClick} ref={this.fa} />
 //   }
 // }
-function Son2 (props, ref) {
-  return <span ref={ref}>son2</span>
-}
-const ForwardSon2 = React.forwardRef(Son2)
-class Fa2 extends React.Component {
+// function Son2 (props, ref) {
+//   return <span ref={ref}>son2</span>
+// }
+// const ForwardSon2 = React.forwardRef(Son2)
+// class Fa2 extends React.Component {
+//   constructor(props) {
+//     super(props)
+//     this.fa = React.createRef()
+//     console.log('1 constructor')
+//     this.state = { num: 1 }
+//   }
+//   faClick = () => {
+//     this.fa.current.innerText = '112'
+//     this.setState({ num: this.state.num + 1 })
+//   }
+//   componentWillMount () {
+//     console.log('2 componentWillMount')
+//   }
+//   componentDidMount () {
+//     console.log('4 componentDidMount')
+//   }
+//   // 当属性发生改变时,会走此方法决定是否渲染更新
+//   shouldComponentUpdate (nextProps, nextState) {
+//     // setState会引起nextState变化
+//     // 父组件更新,会引起nextProps变化
+//     console.log('5 shouldComponentUpdate')
+//     return nextState.num > 3
+//   }
+//   componentWillUpdate () {
+//     console.log('6 shouldComponentUpdate')
+//   }
+//   componentDidUpdate () {
+//     console.log('7 shouldComponentUpdate')
+//   }
+//   render () {
+//     console.log('3 render')
+//     if (this.state.num > 3) {
+//       return (
+//         <button onClick={this.faClick}>click</button>
+//       )
+//     } else {
+//       return <>
+//         <ForwardSon2 ref={this.fa} />
+//         <button onClick={this.faClick}>click</button>
+//       </>
+//     }
+//   }
+// }
+class ChildCounter extends React.Component {
   constructor(props) {
     super(props)
-    this.fa = React.createRef()
+    console.log('1 ChildCounter constructor')
   }
-  faClick = () => {
-    this.fa.current.innerText = '112'
+  componentWillMount () {
+    console.log('2 ChildCounter componentWillMount')
+  }
+  componentDidMount () {
+    console.log('4 ChildCounter componentDidMount')
+  }
+  // 当属性发生改变时,会走此方法决定是否渲染更新
+  shouldComponentUpdate (nextProps, nextState) {
+    // setState会引起nextState变化
+    // 父组件更新,会引起nextProps变化
+    console.log('5 ChildCounter shouldComponentUpdate')
+    return nextProps.num % 3 === 0
+  }
+  componentWillUpdate () {
+    console.log('6 ChildCounter shouldComponentUpdate')
+  }
+  componentDidUpdate () {
+    console.log('7 ChildCounter shouldComponentUpdate')
+  }
+  compontentWillReceiveProps () {
+    console.log('x ChildCounter compontentWillReceiveProps')
+  }
+  componentWillUnmount () {
+    console.log('9 ChildCounter componentWillUnmount')
   }
   render () {
+    console.log('3 ChildCounter render')
+    return (<span>ChildCounter</span>)
+  }
+}
+class Counter extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = { num: 1 }
+    console.log('1 constructor')
+  }
+  componentWillMount () {
+    console.log('2 componentWillMount')
+  }
+  componentDidMount () {
+    console.log('4 componentDidMount')
+  }
+  // 当属性发生改变时,会走此方法决定是否渲染更新
+  shouldComponentUpdate (nextProps, nextState) {
+    // setState会引起nextState变化
+    // 父组件更新,会引起nextProps变化
+    console.log('5 shouldComponentUpdate')
+    return nextState.num % 2 === 0
+  }
+  componentWillUpdate () {
+    console.log('6 shouldComponentUpdate')
+  }
+  componentDidUpdate () {
+    console.log('7 shouldComponentUpdate')
+  }
+  add = () => {
+    this.setState({ num: this.state.num + 1 })
+    // this.forceUpdate()
+  }
+  render () {
+    console.log('3 render', this.state.num % 3 === 0)
+    let childCounter
+    if (this.state.num > 2) {
+      childCounter = null
+    } else {
+      childCounter = <ChildCounter />
+    }
     return <>
-      <ForwardSon2 ref={this.fa} />
-      <button onClick={this.faClick}>click</button>
+      num:{this.state.num}
+      <button onClick={this.add}>+</button>
+      {childCounter}
     </>
   }
 }
@@ -195,6 +303,7 @@ ReactDOM.render(
   // abc,
   // <RefClassComponent />,
   // <Fa />,
-  <Fa2 />,
+  // <Fa2 />,
+  <Counter />,
   document.getElementById('root')
 )

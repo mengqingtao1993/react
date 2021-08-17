@@ -51,8 +51,10 @@ function mountClassComponent (vdom) {
   // debugger
   let { type, props, ref } = vdom
   let classInstance = new type(props)
+  if(classInstance.componentWillMount) classInstance.componentWillMount()
   if (ref) ref.current = classInstance
   let renderDom = classInstance.render()
+  if(classInstance.componentDidMount) classInstance.componentDidMount()
   classInstance.oldRenderVdom = vdom.oldRenderVdom = renderDom// 将类组件vdom与渲染的vdom建立联系,并将实例与vdom建立联系
   return createDom(renderDom)
 }
@@ -62,7 +64,7 @@ function reconcileChildren (children, parentDom) {
   }
 }
 function updateProps (dom, oldProps, newProps) {
-  console.log("newProps", newProps)
+  // console.log("newProps", newProps)
   for (let key in newProps) {
     if (key === 'children') {
       continue

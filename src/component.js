@@ -12,7 +12,8 @@ class Updater {
     }
     this.emitUpdate()// 触发更新
   }
-  emitUpdate () {
+  emitUpdate (nextProps) {
+    this.nextProps = nextProps
     // 如果是批量更新模式,则将更新函数装入updates
     if (updateQueue.isBatchingUpdate) {
       updateQueue.updaters.push(this)
@@ -21,8 +22,9 @@ class Updater {
     }
   }
   updateComponent () {
+    let { nextProps } = this
     if (this.penddingState.length > 0) {
-      shouldUpdate(this.classInstance, this.getState())//传入组件实例和新的状态
+      shouldUpdate(this.classInstance, nextProps, this.getState())//传入组件实例和新的状态
     }
   }
 
@@ -39,11 +41,24 @@ class Updater {
     return state
   }
 }
-function shouldUpdate (classInstance, newState) {
+function shouldUpdate (classInstance, nextProps, nextState) {
+  let willUpdate = true // 默认更新视图
+  if (classInstance.shouldComponentUpdate && !classInstance.shouldComponentUpdate(nextProps, nextState)) {
+    // 如果有这个钩子,并且返回false,则不更新视图
+    willUpdate = false
+  }
+  if (willUpdate && classInstance.componentWillUpdate) {
+    // 如果需要更新,并且有componentWillUpdate钩子,则执行这个钩子
+    classInstance.componentWillUpdate()
+  }
+  // 无论是否更新视图,都要将数据更新了
   // 真正去修改实例状态
-  classInstance.state = newState
-  // 然后调用实例的updateComponent方法进行更新
-  classInstance.forceUpdate()
+  classInstance.state = nextState
+  if (nextProps) classInstance.props = nextProps
+  if (willUpdate) {
+    // 然后调用实例的updateComponent方法进行更新
+    classInstance.forceUpdate()
+  }
 }
 
 export default class Component {
@@ -62,6 +77,9 @@ export default class Component {
     let newRenderVdom = this.render() //类组件中实例方法,此时vdom已经更新,返回最新的vdom
     compareTwoVdom(oldDom.parentNode, oldRenderVdom, newRenderVdom)//对比dom差异
     this.oldRenderVdom = newRenderVdom//更新oldVdom
+    if (this.componentDidUpdate) {
+      this.componentDidUpdate(this.props, this.state)
+    }
   }
 }
 export let updateQueue = {

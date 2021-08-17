@@ -9,9 +9,9 @@ export function addEvent (dom, eventType, handler) {
     store = dom.store
   }
   store[eventType] = handler//store.onclick = handler
-  console.log('创建store', store)
+  // console.log('创建store', store)
   if (!document[eventType]) {
-    console.log('给document绑定事件')
+    // console.log('给document绑定事件')
     // 多个元素有相同事件时,只给document绑一次
     // document.addEventListener(`eventType`,dispatchEvent)
     document[eventType] = dispatchEvent
@@ -26,7 +26,7 @@ function dispatchEvent (event) {
   while (target) {
     let { store } = target//上面在dom中存的
     let handler = store && store[eventType]//事件处理函数上面在dom中存的
-    console.log('执行handler',handler)
+    // console.log('执行handler',handler)
     handler && handler.call(target, syntheticEvent)
     target = target.parentNode
   }
