@@ -51,10 +51,10 @@ function mountClassComponent (vdom) {
   // debugger
   let { type, props, ref } = vdom
   let classInstance = new type(props)
-  if(classInstance.componentWillMount) classInstance.componentWillMount()
+  if (classInstance.componentWillMount) classInstance.componentWillMount()
   if (ref) ref.current = classInstance
   let renderDom = classInstance.render()
-  if(classInstance.componentDidMount) classInstance.componentDidMount()
+  if (classInstance.componentDidMount) classInstance.componentDidMount()
   classInstance.oldRenderVdom = vdom.oldRenderVdom = renderDom// 将类组件vdom与渲染的vdom建立联系,并将实例与vdom建立联系
   return createDom(renderDom)
 }
@@ -94,10 +94,64 @@ export function findDom (vdom) {
 const ReactDOM = {
   render
 }
+// 简易版本,替换dom
+// export function compareTwoVdom (parentDom, oldVdom, newVdom) {
+//   // 查到旧的真实dom,创建新的真实dom,替换
+//   let oldDom = findDom(oldVdom)
+//   let newDom = createDom(newVdom)
+//   parentDom.replaceChild(newDom, oldDom)
+// }
+// dom-diff版比较dom
 export function compareTwoVdom (parentDom, oldVdom, newVdom) {
-  // 查到旧的真实dom,创建新的真实dom,替换
-  let oldDom = findDom(oldVdom)
-  let newDom = createDom(newVdom)
-  parentDom.replaceChild(newDom, oldDom)
+  if (!oldVdom && !newVdom) {
+    // 新老vDOM都是null,就忽略渲染
+    return null
+  } else if (oldVdom && !newVdom) {
+    // 销毁dom时
+    let currentDom = findDom(oldVdom)
+    currentDom.parentNode.removeChild(currentDom)
+    if (oldVdom.classInstance && oldVdom.classInstance.componentWillMount) {
+      // 如果是类组件并且有卸载钩子,则执行
+      oldVdom.classInstance.componentWillMount()
+    }
+    return null
+  } else if (!oldVdom && newVdom) {
+    // dom新创建时
+    let newDom = createDom(newVdom)
+    parentDom.appendChild(newDom)//此处放置在父dom的尾部
+    return newVdom
+  } else if (oldVdom && newVdom && (oldVdom.type !== newVdom.type)) {
+    // 新老dom都有值,但是换了type,则销毁重建
+    let oldDom = findDom(oldVdom)
+    let newDom = createDom(newVdom)
+    oldDom.parentNode.replaceChild(newDom, oldDom)
+    if (oldVdom.classInstance && oldVdom.classInstance.componentWillMount) {
+      // 如果是类组件并且有卸载钩子,则执行
+      oldVdom.classInstance.componentWillMount()
+    }
+    return newVdom
+  } else {
+    // 新老dom相同,直接复用
+    updateElement(oldVdom, newVdom)
+    return newVdom
+  }
+}
+function updateElement (oldVdom, newVdom) {
+  if (typeof oldVdom.type === 'string') {
+    // 如果是原生dom,直接复用老的dom属性,再更新属性
+    let currentDom = newVdom.dom = findDom(newVdom)
+    updateProps(currentDom, oldVdom.props, newVdom.props)
+    // 更新好自身dom属性后,更新子节点
+    updateChildren(currentDom, oldVdom.props.children, newVdom.props.children)
+  }
+}
+function updateChildren (parentDom, oldChildren, newChildren) {
+  // 将两个children都变成数组,方便比较
+  oldChildren = Array.isArray(oldChildren) ? oldChildren : [oldChildren]
+  newChildren = Array.isArray(newChildren) ? newChildren : [newChildren]
+  let maxLength = math.max(oldChildren.length, newChildren.length)
+  for (var i = 0; i < maxLength; i++) {
+    compareTwoVdom(parentDom, oldChildren[i], newChildren[i])
+  }
 }
 export default ReactDOM
