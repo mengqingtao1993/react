@@ -1,4 +1,5 @@
 import Component from './component'
+import wrapToVdom from './utils'
 function createElement (type, config, children) {
   let ref
   let key
@@ -10,9 +11,11 @@ function createElement (type, config, children) {
   }
   let props = { ...config }
   if (arguments.length > 3) {
-    props.children = Array.prototype.slice.call(arguments, 2)
+    props.children = Array.prototype.slice.call(arguments, 2).map(wrapToVdom)
+    // props.children = Array.prototype.slice.call(arguments, 2)
   } else {
-    props.children = children
+    props.children = wrapToVdom(children)
+    // props.children = children
   }
   return {
     type,

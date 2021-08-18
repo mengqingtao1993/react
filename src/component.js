@@ -72,6 +72,7 @@ export default class Component {
     this.updater.addState(partialState, callback)
   }
   forceUpdate () {
+    // debugger
     let oldRenderVdom = this.oldRenderVdom //创建dom元素时,将vdom挂载到实例上
     let oldDom = findDom(oldRenderVdom) // 找到vdom对应的真实dom
     let newRenderVdom = this.render() //类组件中实例方法,此时vdom已经更新,返回最新的vdom

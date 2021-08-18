@@ -1,28 +1,29 @@
-// import REACT_TEXT from './types'
+import REACT_TEXT from './types'
 import { addEvent } from './event'
 function render (vdom, container) {
   let newDom = createDom(vdom)// 获取真实dom
   container.appendChild(newDom)
+  if (newDom.componentDidMount) newDom.componentDidMount()
 }
 function createDom (vdom) {
-  if (typeof vdom === 'number' || typeof vdom === 'string') {
-    return document.createTextNode(vdom)
-  }
+  // if (typeof vdom === 'number' || typeof vdom === 'string') {
+  //   return document.createTextNode(vdom)
+  // }
   let { type, props, ref } = vdom
   let dom
   // 创建对应type的dom活textNode
-  // if (type === REACT_TEXT || typeof vdom == 'string') {
-  //   dom = document.createTextNode(props.content)
-  // } else 
-  if (typeof type === 'function') {
-    if (type.isReactComponent) {
-      return mountClassComponent(vdom)
+  if (type === REACT_TEXT || typeof vdom == 'string') {
+    dom = document.createTextNode(props.content)
+  } else
+    if (typeof type === 'function') {
+      if (type.isReactComponent) {
+        return mountClassComponent(vdom)
+      } else {
+        return mountFunctionComponent(vdom)
+      }
     } else {
-      return mountFunctionComponent(vdom)
+      dom = document.createElement(type)
     }
-  } else {
-    dom = document.createElement(type)
-  }
   // 给创建的dom添加属性
   if (props) {
     updateProps(dom, {}, props)
@@ -53,10 +54,15 @@ function mountClassComponent (vdom) {
   let classInstance = new type(props)
   if (classInstance.componentWillMount) classInstance.componentWillMount()
   if (ref) ref.current = classInstance
+  vdom.classInstance = classInstance
   let renderDom = classInstance.render()
-  if (classInstance.componentDidMount) classInstance.componentDidMount()
   classInstance.oldRenderVdom = vdom.oldRenderVdom = renderDom// 将类组件vdom与渲染的vdom建立联系,并将实例与vdom建立联系
-  return createDom(renderDom)
+  let dom = createDom(renderDom)
+  if (classInstance.componentDidMount) {
+    // 如果有componentDidMount钩子,将它挂到真实dom上
+    dom.componentDidMount = classInstance.componentDidMount.bind(this)
+  }
+  return dom
 }
 function reconcileChildren (children, parentDom) {
   for (let i = 0; i < children.length; i++) {
@@ -64,7 +70,6 @@ function reconcileChildren (children, parentDom) {
   }
 }
 function updateProps (dom, oldProps, newProps) {
-  // console.log("newProps", newProps)
   for (let key in newProps) {
     if (key === 'children') {
       continue
@@ -102,10 +107,9 @@ const ReactDOM = {
 //   parentDom.replaceChild(newDom, oldDom)
 // }
 // dom-diff版比较dom
-export function compareTwoVdom (parentDom, oldVdom, newVdom) {
+export function compareTwoVdom (parentDom, oldVdom, newVdom, nextDom) {
   if (!oldVdom && !newVdom) {
     // 新老vDOM都是null,就忽略渲染
-    return null
   } else if (oldVdom && !newVdom) {
     // 销毁dom时
     let currentDom = findDom(oldVdom)
@@ -114,44 +118,78 @@ export function compareTwoVdom (parentDom, oldVdom, newVdom) {
       // 如果是类组件并且有卸载钩子,则执行
       oldVdom.classInstance.componentWillMount()
     }
-    return null
   } else if (!oldVdom && newVdom) {
     // dom新创建时
     let newDom = createDom(newVdom)
-    parentDom.appendChild(newDom)//此处放置在父dom的尾部
-    return newVdom
+    if (nextDom) {
+      parentDom.insertBefore(newDom, nextDom)
+    } else {
+      parentDom.appendChild(newDom)//后面没有dom,则放置在父dom的尾部
+    }
+    if (newDom.componentDidMount) newDom.componentDidMount()
   } else if (oldVdom && newVdom && (oldVdom.type !== newVdom.type)) {
     // 新老dom都有值,但是换了type,则销毁重建
     let oldDom = findDom(oldVdom)
     let newDom = createDom(newVdom)
     oldDom.parentNode.replaceChild(newDom, oldDom)
+    if (newDom.componentDidMount) newDom.componentDidMount()
     if (oldVdom.classInstance && oldVdom.classInstance.componentWillMount) {
       // 如果是类组件并且有卸载钩子,则执行
       oldVdom.classInstance.componentWillMount()
     }
-    return newVdom
   } else {
     // 新老dom相同,直接复用
     updateElement(oldVdom, newVdom)
-    return newVdom
   }
 }
 function updateElement (oldVdom, newVdom) {
   if (typeof oldVdom.type === 'string') {
     // 如果是原生dom,直接复用老的dom属性,再更新属性
-    let currentDom = newVdom.dom = findDom(newVdom)
+    let currentDom = newVdom.dom = findDom(oldVdom)
     updateProps(currentDom, oldVdom.props, newVdom.props)
     // 更新好自身dom属性后,更新子节点
     updateChildren(currentDom, oldVdom.props.children, newVdom.props.children)
+  } else if (oldVdom.type === REACT_TEXT && newVdom.type === REACT_TEXT) {
+    // 如果是文本更新
+    let currentDom = newVdom.dom = findDom(oldVdom)
+    if (oldVdom.props.content !== newVdom.props.content) {
+      currentDom.textContent = newVdom.props.content
+    }
+  } else if (typeof oldVdom.type === 'function') {
+    // 如果是更新组建
+    if (oldVdom.type.isReactComponent) {
+      // 类组件
+      updateClassComponent(oldVdom, newVdom)
+    } else {
+      // 函数组件
+      updateFunctionComponent(oldVdom, newVdom)
+    }
   }
+}
+function updateClassComponent (oldVdom, newVdom) {
+  // 直接去触发类组件实例中的更新方法emitUpdate
+  let classInstance = newVdom.classInstance = oldVdom.classInstance
+  newVdom.oldRenderVdom = oldVdom.oldRenderVdom
+  if (classInstance.componentWillReceiveProps) classInstance.componentWillReceiveProps()
+  classInstance.updater.emitUpdate(newVdom.props)
+}
+function updateFunctionComponent (oldVdom, newVdom) {
+  let parentDom = findDom(oldVdom).parentNode
+  let { type, props } = newVdom
+  let renderVdom = type(props)
+  newVdom.oldRenderVdom = renderVdom
+  compareTwoVdom(parentDom, oldVdom.oldRenderVdom, renderVdom)
 }
 function updateChildren (parentDom, oldChildren, newChildren) {
   // 将两个children都变成数组,方便比较
   oldChildren = Array.isArray(oldChildren) ? oldChildren : [oldChildren]
   newChildren = Array.isArray(newChildren) ? newChildren : [newChildren]
-  let maxLength = math.max(oldChildren.length, newChildren.length)
+  let maxLength = Math.max(oldChildren.length, newChildren.length)
   for (var i = 0; i < maxLength; i++) {
-    compareTwoVdom(parentDom, oldChildren[i], newChildren[i])
+    // 查找插入位置
+    let nextVNode = oldChildren.find((item, index) => index > i && item && findDom(item))
+    let nextDom = nextVNode && findDom(nextVNode)
+    compareTwoVdom(parentDom, oldChildren[i], newChildren[i], nextDom)
   }
 }
 export default ReactDOM

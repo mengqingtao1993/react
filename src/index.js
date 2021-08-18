@@ -1,5 +1,5 @@
-import React from 'react'
-import ReactDOM from 'react-dom'
+import React from './react'
+import ReactDOM from './react-dom'
 /**
  * 
  * @param {state} props 
@@ -229,12 +229,12 @@ class ChildCounter extends React.Component {
     console.log('4 ChildCounter componentDidMount')
   }
   // 当属性发生改变时,会走此方法决定是否渲染更新
-  shouldComponentUpdate (nextProps, nextState) {
-    // setState会引起nextState变化
-    // 父组件更新,会引起nextProps变化
-    console.log('5 ChildCounter shouldComponentUpdate')
-    return nextProps.num % 3 === 0
-  }
+  // shouldComponentUpdate (nextProps, nextState) {
+  //   // setState会引起nextState变化
+  //   // 父组件更新,会引起nextProps变化
+  //   console.log('5 ChildCounter shouldComponentUpdate')
+  //   return nextProps.num % 3 === 0
+  // }
   componentWillUpdate () {
     console.log('6 ChildCounter shouldComponentUpdate')
   }
@@ -249,7 +249,7 @@ class ChildCounter extends React.Component {
   }
   render () {
     console.log('3 ChildCounter render')
-    return (<span>ChildCounter</span>)
+    return (<span>{this.props.num}</span>)
   }
 }
 class Counter extends React.Component {
@@ -265,12 +265,12 @@ class Counter extends React.Component {
     console.log('4 componentDidMount')
   }
   // 当属性发生改变时,会走此方法决定是否渲染更新
-  shouldComponentUpdate (nextProps, nextState) {
-    // setState会引起nextState变化
-    // 父组件更新,会引起nextProps变化
-    console.log('5 shouldComponentUpdate')
-    return nextState.num % 2 === 0
-  }
+  // shouldComponentUpdate (nextProps, nextState) {
+  //   // setState会引起nextState变化
+  //   // 父组件更新,会引起nextProps变化
+  //   console.log('5 shouldComponentUpdate')
+  //   return nextState.num % 2 === 0
+  // }
   componentWillUpdate () {
     console.log('6 shouldComponentUpdate')
   }
@@ -282,18 +282,19 @@ class Counter extends React.Component {
     // this.forceUpdate()
   }
   render () {
-    console.log('3 render', this.state.num % 3 === 0)
+    // return <span>123</span>
+    // console.log('3 render', this.state.num % 3 === 0)
     let childCounter
     if (this.state.num > 2) {
-      childCounter = null
+      childCounter = <ChildCounter num={this.state.num} />
     } else {
-      childCounter = <ChildCounter />
+      childCounter = <span>{this.state.num}span</span>
     }
-    return <>
-      num:{this.state.num}
+    return <div><span>num:{this.state.num}</span>
       <button onClick={this.add}>+</button>
       {childCounter}
-    </>
+      <span>尾部</span>
+    </div>
   }
 }
 ReactDOM.render(
