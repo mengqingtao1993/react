@@ -52,9 +52,17 @@ function shouldUpdate (classInstance, nextProps, nextState) {
     classInstance.componentWillUpdate()
   }
   // 无论是否更新视图,都要将数据更新了
-  // 真正去修改实例状态
-  classInstance.state = nextState
   if (nextProps) classInstance.props = nextProps
+  // 此时有新的props和旧的state,触发钩子
+  if (classInstance.constructor.getDerivedStateFromProps) {
+    let newState = classInstance.constructor.getDerivedStateFromProps()
+    if (newState) {
+      classInstance.state = newState
+    }
+  } else {
+    classInstance.state = nextState
+  }
+  // 真正去修改实例状态
   if (willUpdate) {
     // 然后调用实例的updateComponent方法进行更新
     classInstance.forceUpdate()

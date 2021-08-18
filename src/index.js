@@ -220,32 +220,14 @@ import ReactDOM from './react-dom'
 class ChildCounter extends React.Component {
   constructor(props) {
     super(props)
+    this.props = props
+    this.state = { a: '1' }
     console.log('1 ChildCounter constructor')
   }
-  componentWillMount () {
-    console.log('2 ChildCounter componentWillMount')
-  }
-  componentDidMount () {
-    console.log('4 ChildCounter componentDidMount')
-  }
-  // 当属性发生改变时,会走此方法决定是否渲染更新
-  // shouldComponentUpdate (nextProps, nextState) {
-  //   // setState会引起nextState变化
-  //   // 父组件更新,会引起nextProps变化
-  //   console.log('5 ChildCounter shouldComponentUpdate')
-  //   return nextProps.num % 3 === 0
-  // }
-  componentWillUpdate () {
-    console.log('6 ChildCounter shouldComponentUpdate')
-  }
-  componentDidUpdate () {
-    console.log('7 ChildCounter shouldComponentUpdate')
-  }
-  compontentWillReceiveProps () {
-    console.log('x ChildCounter compontentWillReceiveProps')
-  }
-  componentWillUnmount () {
-    console.log('9 ChildCounter componentWillUnmount')
+  static getDerivedStateFromProps (nextProps, oldState) {
+    console.log(nextProps, 'nextProps')
+    console.log(oldState, 'oldState')
+    return 1
   }
   render () {
     console.log('3 ChildCounter render')
