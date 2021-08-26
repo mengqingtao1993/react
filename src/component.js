@@ -83,11 +83,19 @@ export default class Component {
     // debugger
     let oldRenderVdom = this.oldRenderVdom //创建dom元素时,将vdom挂载到实例上
     let oldDom = findDom(oldRenderVdom) // 找到vdom对应的真实dom
+    if(this.constructor.contextType){
+      // 更新时重新取context
+      this.context = this.constructor.contextType.Provider._value
+    }
     let newRenderVdom = this.render() //类组件中实例方法,此时vdom已经更新,返回最新的vdom
+    let extraArgs
+    if (this.getSnapshotBeforeUpdate) {
+      extraArgs = this.getSnapshotBeforeUpdate()
+    }
     compareTwoVdom(oldDom.parentNode, oldRenderVdom, newRenderVdom)//对比dom差异
     this.oldRenderVdom = newRenderVdom//更新oldVdom
     if (this.componentDidUpdate) {
-      this.componentDidUpdate(this.props, this.state)
+      this.componentDidUpdate(this.props, this.state, extraArgs)
     }
   }
 }

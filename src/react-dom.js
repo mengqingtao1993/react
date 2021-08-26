@@ -52,6 +52,10 @@ function mountClassComponent (vdom) {
   // debugger
   let { type, props, ref } = vdom
   let classInstance = new type(props)
+  if (type.contextType) {
+    // 挂载时取context
+    classInstance.context = type.contextType.Provider_value
+  }
   if (classInstance.componentWillMount) classInstance.componentWillMount()
   if (ref) ref.current = classInstance
   vdom.classInstance = classInstance
@@ -60,7 +64,7 @@ function mountClassComponent (vdom) {
   let dom = createDom(renderDom)
   if (classInstance.componentDidMount) {
     // 如果有componentDidMount钩子,将它挂到真实dom上
-    dom.componentDidMount = classInstance.componentDidMount.bind(this)
+    dom.componentDidMount = classInstance.componentDidMount.bind(classInstance)
   }
   return dom
 }
@@ -192,4 +196,29 @@ function updateChildren (parentDom, oldChildren, newChildren) {
     compareTwoVdom(parentDom, oldChildren[i], newChildren[i], nextDom)
   }
 }
+
+let hookState = [] // 所有hook中的state
+let hookIndex = 0 // hook的索引
+let shcedUpdate // 调度更新方法,更新时清空index,并调compareTwoVdom
+export function useState (initialState) {
+  hookState[hookIndex] = hookState[hookIndex] || initialState
+  let currentIndex = hookIndex//取index存在闭包中
+  function setState (newState) {
+    // 赋值并调度更新方法
+    hookState[currentIndex] = newState
+    shcedUpdate()
+  }
+  return [hookState[hookIndex++], setState]
+}
+export function useReducer (reducer, initialState) {
+  hookState[hookIndex] = hookState[hookIndex] || initialState
+  let currentIndex = hookIndex//取index存在闭包中
+  function dispatch (action) {
+    // 赋值并调度更新方法
+    hookState[currentIndex] = reducer(hookState[hookIndex], action)
+    shcedUpdate()
+  }
+  return [hookState[hookIndex++], dispatch]
+}
+
 export default ReactDOM

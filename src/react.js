@@ -34,10 +34,21 @@ function forwardRef (functionComponent) {
     }
   }
 }
+function createContext () {
+  function Provider ({ value, children }) {
+    this._value = value
+    return children
+  }
+  function Consumer ({ children }) {
+    return children(Provider._value)
+  }
+  return { Provider, Consumer }
+}
 const React = {
   createElement,
   Component,
   createRef,
-  forwardRef
+  forwardRef,
+  createContext
 }
 export default React
